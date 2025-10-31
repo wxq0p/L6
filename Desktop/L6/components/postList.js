@@ -93,7 +93,6 @@ export class PostList {
             className: 'btn btn-primary btn-sm',
             onclick: (e) => {
                 e.stopPropagation();
-                console.log('Navigating to comments for post:', post.id);
                 this.app.navigateTo(`users#posts#comments#${post.id}`);
             }
         });
@@ -113,16 +112,26 @@ export class PostList {
             const users = await API.getUsers();
             this.user = users.find(user => user.id === this.userId);
             
-            this.posts = await API.getUserPosts(this.userId);
-            
-            for (let post of this.posts) {
-                const comments = await API.getPostComments(post.id);
-                post.commentsCount = comments.length;
+            if (!this.user) {
+                console.error('User not found:', this.userId);
+                return;
             }
             
+            this.posts = await API.getUserPosts(this.userId);
+            
+            const commentPromises = this.posts.map(async (post) => {
+                try {
+                    const comments = await API.getPostComments(post.id);
+                    post.commentsCount = comments.length;
+                } catch (error) {
+                    console.error(`Error loading comments for post ${post.id}:`, error);
+                    post.commentsCount = 0;
+                }
+            });
+            
+            await Promise.all(commentPromises);
             this.filterPosts();
             
-            console.log('Loaded posts for user', this.userId, ':', this.posts);
         } catch (error) {
             console.error('Error loading posts:', error);
             this.posts = [];

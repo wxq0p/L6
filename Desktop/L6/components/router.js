@@ -21,13 +21,10 @@ export class Router {
 
     handleRouteChange() {
         const hash = window.location.hash.substring(1) || 'users';
-        console.log('Route changed to:', hash);
         this.navigateTo(hash);
     }
 
     navigateTo(path) {
-        console.log('Navigating to:', path);
-        
         if (path.startsWith('users#todos#')) {
             this.showUserTodos();
             this.updateBrowserHistory(path);
@@ -74,7 +71,6 @@ export class Router {
 
     async showUsers() {
         try {
-            console.log('Showing users list');
             const userList = new UserList(this.app);
             const view = await userList.render();
             this.app.setView(view);
@@ -87,14 +83,11 @@ export class Router {
     async showUserTodos() {
         try {
             const userId = this.getUserIdFromHash();
-            console.log('Showing todos for user:', userId);
-            
             if (userId) {
                 const todoList = new TodoList(this.app, userId);
                 const view = await todoList.render();
                 this.app.setView(view);
             } else {
-                console.log('No user ID found, showing users list');
                 this.showUsers();
             }
         } catch (error) {
@@ -106,14 +99,11 @@ export class Router {
     async showUserPosts() {
         try {
             const userId = this.getUserIdFromHash();
-            console.log('Showing posts for user:', userId);
-            
             if (userId) {
                 const postList = new PostList(this.app, userId);
                 const view = await postList.render();
                 this.app.setView(view);
             } else {
-                console.log('No user ID found, showing users list');
                 this.showUsers();
             }
         } catch (error) {
@@ -136,14 +126,11 @@ export class Router {
     async showPostComments() {
         try {
             const postId = this.getPostIdFromHash();
-            console.log('Showing comments for post:', postId);
-            
             if (postId) {
                 const commentList = new CommentList(this.app, postId);
                 const view = await commentList.render();
                 this.app.setView(view);
             } else {
-                console.log('No post ID found, showing users list');
                 this.showUsers();
             }
         } catch (error) {
@@ -154,31 +141,17 @@ export class Router {
 
     getUserIdFromHash() {
         const hash = window.location.hash.substring(1);
-        console.log('Current hash:', hash);
-        
         const match1 = hash.match(/users#todos#(\d+)/);
         const match2 = hash.match(/users#posts#(\d+)/);
         
-        if (match1) {
-            return parseInt(match1[1]);
-        } else if (match2) {
-            return parseInt(match2[1]);
-        }
-        
+        if (match1) return parseInt(match1[1]);
+        if (match2) return parseInt(match2[1]);
         return null;
     }
 
     getPostIdFromHash() {
         const hash = window.location.hash.substring(1);
-        console.log('Getting post ID from hash:', hash);
-        
         const match = hash.match(/users#posts#comments#(\d+)/);
-        if (match) {
-            console.log('Found post ID:', match[1]);
-            return parseInt(match[1]);
-        }
-        
-        console.log('No post ID found in hash');
-        return null;
+        return match ? parseInt(match[1]) : null;
     }
 }

@@ -43,7 +43,6 @@ export class CommentList {
             textContent: 'Back to Posts',
             className: 'btn btn-secondary',
             onclick: () => {
-                // Возвращаемся к постам пользователя
                 const userId = this.post ? this.post.userId : null;
                 if (userId) {
                     this.app.navigateTo(`users#posts#${userId}`);
@@ -120,15 +119,17 @@ export class CommentList {
 
     async loadData() {
         try {
-            console.log('Loading comments for post:', this.postId);
-            
             const allPosts = await API.getAllPosts();
             this.post = allPosts.find(post => post.id === this.postId);
             
+            if (!this.post) {
+                console.error('Post not found:', this.postId);
+                return;
+            }
+
             this.comments = await API.getPostComments(this.postId);
             this.filterComments();
             
-            console.log('Loaded comments:', this.comments);
         } catch (error) {
             console.error('Error loading comments:', error);
             this.comments = [];
