@@ -5,7 +5,7 @@ import { Search } from './components/search.js';
 class App {
     constructor() {
         this.root = document.getElementById('root');
-        this.router = new Router(this);
+        this.router = null;
         this.breadcrumbs = null;
         this.search = null;
         this.currentView = null;
@@ -15,6 +15,7 @@ class App {
 
     init() {
         this.renderLayout();
+        this.router = new Router(this);
         this.breadcrumbs = new Breadcrumbs();
         this.search = new Search(this);
         this.router.init();
@@ -68,16 +69,21 @@ class App {
     }
 
     navigateTo(path) {
+        console.log('App navigating to:', path);
         this.router.navigateTo(path);
     }
 
     setView(viewComponent) {
         const content = document.getElementById('content');
-        if (!content || !viewComponent) return;
+        if (!content || !viewComponent) {
+            console.error('Content container or view component not found');
+            return;
+        }
         
         content.innerHTML = '';
         content.appendChild(viewComponent);
         this.currentView = viewComponent;
+        console.log('View updated successfully');
     }
 
     updateBreadcrumbs(paths) {
@@ -90,6 +96,7 @@ class App {
         return this.search ? this.search.getCurrentTerm() : '';
     }
 }
-
-// Инициализация приложения
-new App();
+document.addEventListener('DOMContentLoaded', () => {
+    console.log('DOM loaded, initializing app...');
+    new App();
+});

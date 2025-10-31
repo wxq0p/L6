@@ -284,23 +284,18 @@ export class TodoList {
 
     async loadData() {
         try {
-            // Получаем пользователя
             const users = await API.getUsers();
             this.user = users.find(user => user.id === this.userId);
             
-            // Получаем todos с API
             const apiTodos = await API.getUserTodos(this.userId);
-            // Получаем кастомные todos
             const customTodos = this.storage.getUserTodos(this.userId);
             
-            // Объединяем todos
             this.todos = [...apiTodos, ...customTodos];
             this.filterTodos();
             
             console.log('Loaded todos for user', this.userId, ':', this.todos);
         } catch (error) {
             console.error('Error loading todos:', error);
-            // В случае ошибки используем только кастомные todos
             this.todos = this.storage.getUserTodos(this.userId);
             this.filterTodos();
         }

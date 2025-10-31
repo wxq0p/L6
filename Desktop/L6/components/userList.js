@@ -68,17 +68,17 @@ export class UserList {
             className: 'user-email'
         });
         
+        const username = DOM.createElement('p', { 
+            textContent: `@${user.username}`,
+            className: 'user-username'
+        });
+        
         const actions = this.createUserActions(user);
         
         card.appendChild(name);
         card.appendChild(email);
+        card.appendChild(username);
         card.appendChild(actions);
-        
-        card.addEventListener('click', (e) => {
-            if (!e.target.closest('.user-actions')) {
-                this.app.navigateTo(`users#todos#${user.id}`);
-            }
-        });
         
         return card;
     }
@@ -91,6 +91,7 @@ export class UserList {
             className: 'btn btn-secondary btn-sm',
             onclick: (e) => {
                 e.stopPropagation();
+                console.log('Navigating to todos for user:', user.id);
                 this.app.navigateTo(`users#todos#${user.id}`);
             }
         });
@@ -100,6 +101,7 @@ export class UserList {
             className: 'btn btn-secondary btn-sm',
             onclick: (e) => {
                 e.stopPropagation();
+                console.log('Navigating to posts for user:', user.id);
                 this.app.navigateTo(`users#posts#${user.id}`);
             }
         });
@@ -226,22 +228,22 @@ export class UserList {
         }
     }
 
-async loadData() {
-    try {
-        console.log('Loading users data...');
-        const apiUsers = await API.getUsers();
-        const customUsers = this.storage.getUsers();
-        
-        this.users = [...apiUsers, ...customUsers];
-        this.filterUsers();
-        
-        console.log('Loaded users:', this.users);
-    } catch (error) {
-        console.error('Error loading users:', error);
-        this.users = this.storage.getUsers();
-        this.filterUsers();
+    async loadData() {
+        try {
+            console.log('Loading users data...');
+            const apiUsers = await API.getUsers();
+            const customUsers = this.storage.getUsers();
+            
+            this.users = [...apiUsers, ...customUsers];
+            this.filterUsers();
+            
+            console.log('Loaded users:', this.users);
+        } catch (error) {
+            console.error('Error loading users:', error);
+            this.users = this.storage.getUsers();
+            this.filterUsers();
+        }
     }
-}
 
     filterUsers() {
         const searchTerm = this.app.getSearchTerm();

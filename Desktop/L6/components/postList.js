@@ -106,14 +106,10 @@ export class PostList {
 
     async loadData() {
         try {
-            // Получаем пользователя
             const users = await API.getUsers();
             this.user = users.find(user => user.id === this.userId);
-            
-            // Получаем посты с API
+
             this.posts = await API.getUserPosts(this.userId);
-            
-            // Для каждого поста получаем количество комментариев
             for (let post of this.posts) {
                 const comments = await API.getPostComments(post.id);
                 post.commentsCount = comments.length;

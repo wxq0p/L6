@@ -1,4 +1,3 @@
-// Локальные данные для демонстрации
 const localUsers = [
     {
         "id": 1,
@@ -104,7 +103,6 @@ export class API {
         }
     }
 
-    // Альтернативные методы для получения всех данных сразу
     static async getAllTodos() {
         try {
             const response = await fetch('https://jsonplaceholder.typicode.com/todos');
