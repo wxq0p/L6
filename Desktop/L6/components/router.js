@@ -134,15 +134,21 @@ export class Router {
     }
 
     async showPostComments() {
-        const postId = this.getPostIdFromHash();
-        console.log('Showing comments for post:', postId);
-        
-        if (postId) {
-            const commentList = new CommentList(this.app, postId);
-            const view = await commentList.render();
-            this.app.setView(view);
-        } else {
-            this.showUsers();
+        try {
+            const postId = this.getPostIdFromHash();
+            console.log('Showing comments for post:', postId);
+            
+            if (postId) {
+                const commentList = new CommentList(this.app, postId);
+                const view = await commentList.render();
+                this.app.setView(view);
+            } else {
+                console.log('No post ID found, showing users list');
+                this.showUsers();
+            }
+        } catch (error) {
+            console.error('Error showing comments:', error);
+            this.showError('Failed to load comments');
         }
     }
 
@@ -164,7 +170,15 @@ export class Router {
 
     getPostIdFromHash() {
         const hash = window.location.hash.substring(1);
+        console.log('Getting post ID from hash:', hash);
+        
         const match = hash.match(/users#posts#comments#(\d+)/);
-        return match ? parseInt(match[1]) : null;
+        if (match) {
+            console.log('Found post ID:', match[1]);
+            return parseInt(match[1]);
+        }
+        
+        console.log('No post ID found in hash');
+        return null;
     }
 }

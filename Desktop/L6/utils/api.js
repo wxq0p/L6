@@ -103,19 +103,9 @@ export class API {
         }
     }
 
-    static async getAllTodos() {
-        try {
-            const response = await fetch('https://jsonplaceholder.typicode.com/todos');
-            if (!response.ok) throw new Error('API not available');
-            return await response.json();
-        } catch (error) {
-            console.log('Error fetching all todos:', error);
-            return [];
-        }
-    }
-
     static async getAllPosts() {
         try {
+            console.log('Fetching all posts...');
             const response = await fetch('https://jsonplaceholder.typicode.com/posts');
             if (!response.ok) throw new Error('API not available');
             return await response.json();
@@ -127,6 +117,7 @@ export class API {
 
     static async getAllComments() {
         try {
+            console.log('Fetching all comments...');
             const response = await fetch('https://jsonplaceholder.typicode.com/comments');
             if (!response.ok) throw new Error('API not available');
             return await response.json();

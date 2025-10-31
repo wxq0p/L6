@@ -91,7 +91,11 @@ export class PostList {
         const commentsBtn = DOM.createElement('button', {
             textContent: `View Comments (${post.commentsCount || 0})`,
             className: 'btn btn-primary btn-sm',
-            onclick: () => this.app.navigateTo(`users#posts#comments#${post.id}`)
+            onclick: (e) => {
+                e.stopPropagation();
+                console.log('Navigating to comments for post:', post.id);
+                this.app.navigateTo(`users#posts#comments#${post.id}`);
+            }
         });
         
         actions.appendChild(commentsBtn);
@@ -108,8 +112,9 @@ export class PostList {
         try {
             const users = await API.getUsers();
             this.user = users.find(user => user.id === this.userId);
-
+            
             this.posts = await API.getUserPosts(this.userId);
+            
             for (let post of this.posts) {
                 const comments = await API.getPostComments(post.id);
                 post.commentsCount = comments.length;

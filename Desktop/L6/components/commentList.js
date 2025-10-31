@@ -39,8 +39,23 @@ export class CommentList {
         const stats = DOM.createElement('div', { className: 'comment-stats' });
         stats.textContent = `${this.filteredComments.length} comments`;
         
+        const backBtn = DOM.createElement('button', {
+            textContent: 'Back to Posts',
+            className: 'btn btn-secondary',
+            onclick: () => {
+                // Возвращаемся к постам пользователя
+                const userId = this.post ? this.post.userId : null;
+                if (userId) {
+                    this.app.navigateTo(`users#posts#${userId}`);
+                } else {
+                    this.app.navigateTo('users');
+                }
+            }
+        });
+        
         header.appendChild(title);
         header.appendChild(stats);
+        header.appendChild(backBtn);
         
         return header;
     }
@@ -51,7 +66,7 @@ export class CommentList {
         if (this.filteredComments.length === 0) {
             const emptyMessage = DOM.createElement('div', { 
                 className: 'empty-state',
-                textContent: 'No comments found'
+                textContent: 'No comments found for this post'
             });
             container.appendChild(emptyMessage);
             return container;
@@ -91,20 +106,33 @@ export class CommentList {
             className: 'comment-body'
         });
         
+        const meta = DOM.createElement('div', {
+            className: 'comment-meta',
+            textContent: `Comment ID: ${comment.id}`
+        });
+        
         commentItem.appendChild(header);
         commentItem.appendChild(body);
+        commentItem.appendChild(meta);
         
         return commentItem;
     }
 
     async loadData() {
         try {
-            this.post = { id: this.postId, title: `Post #${this.postId}` };
+            console.log('Loading comments for post:', this.postId);
+            
+            const allPosts = await API.getAllPosts();
+            this.post = allPosts.find(post => post.id === this.postId);
             
             this.comments = await API.getPostComments(this.postId);
             this.filterComments();
+            
+            console.log('Loaded comments:', this.comments);
         } catch (error) {
             console.error('Error loading comments:', error);
+            this.comments = [];
+            this.filterComments();
         }
     }
 
