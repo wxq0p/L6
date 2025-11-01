@@ -89,7 +89,7 @@ export class PostList {
         const actions = DOM.createElement('div', { className: 'post-actions' });
         
         const commentsBtn = DOM.createElement('button', {
-            textContent: `View Comments (${post.commentsCount || 0})`,
+            textContent: `Comments (${post.commentsCount || 0})`,
             className: 'btn btn-primary btn-sm',
             onclick: (e) => {
                 e.stopPropagation();

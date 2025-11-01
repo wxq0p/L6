@@ -10,7 +10,6 @@ export class Router {
             'users': this.showUsers.bind(this),
             'users#todos': this.showUserTodos.bind(this),
             'users#posts': this.showUserPosts.bind(this),
-            'users#posts#comments': this.showPostComments.bind(this)
         };
     }
 
@@ -34,10 +33,7 @@ export class Router {
         } else if (path.startsWith('users#posts#')) {
             this.showUserPosts();
             this.updateBrowserHistory(path);
-        } else if (path.startsWith('users#posts#comments#')) {
-            this.showPostComments();
-            this.updateBrowserHistory(path);
-        } else {
+        }  else {
             const handler = this.routes[path];
             if (handler) {
                 handler();
@@ -68,7 +64,6 @@ export class Router {
     getBreadcrumbNameForId(id, index, paths) {
         if (index === 2 && paths[1] === 'todos') return `User ${id} Todos`;
         if (index === 2 && paths[1] === 'posts') return `User ${id} Posts`;
-        if (index === 3 && paths[2] === 'comments') return `Post ${id} Comments`;
         return id;
     }
 
@@ -129,22 +124,10 @@ export class Router {
     }
 
     async showPostComments() {
-        try {
             const postId = this.getPostIdFromHash();
             console.log('Showing comments for post:', postId);
-            if (postId) {
-                const commentList = new CommentList(this.app, postId);
-                const view = await commentList.render();
-                this.app.setView(view);
-            } else {
-                console.log('No post ID found');
-                this.showUsers();
-            }
-        } catch (error) {
-            console.error('Error showing comments:', error);
-            this.showError('Failed to load comments');
         }
-    }
+       
 
     getUserIdFromHash() {
         const hash = window.location.hash.substring(1);
