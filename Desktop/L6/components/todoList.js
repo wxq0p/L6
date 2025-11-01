@@ -126,7 +126,7 @@ export class TodoList {
         
         const meta = DOM.createElement('div', {
             className: 'todo-meta',
-            textContent: `ID: ${todo.id} | User ID: ${todo.userId}`
+            textContent: `ID: ${todo.id} | User ID: ${todo.userId} ${todo.isCustom ? '| Custom' : ''}`
         });
         
         content.appendChild(title);
@@ -260,14 +260,45 @@ export class TodoList {
     }
 
     async toggleTodo(todoId, completed) {
-        const todo = this.todos.find(t => t.id === todoId);
-        if (todo && todo.isCustom) {
-            todo.completed = completed;
-            const todos = this.storage.getTodos().filter(t => t.id !== todoId);
-            todos.push(todo);
-            localStorage.setItem('customTodos', JSON.stringify(todos));
+        console.log('Toggling todo:', todoId, 'to:', completed);
+        
+        const todoIndex = this.todos.findIndex(t => t.id === todoId);
+        if (todoIndex === -1) {
+            console.error('Todo not found:', todoId);
+            return;
         }
         
+        const todo = this.todos[todoIndex];
+        
+        if (todo.isCustom) {
+            console.log('Updating custom todo in storage');
+            todo.completed = completed;
+            
+            const customTodos = this.storage.getTodos();
+            const updatedTodos = customTodos.map(t => 
+                t.id === todoId ? { ...t, completed } : t
+            );
+            localStorage.setItem('customTodos', JSON.stringify(updatedTodos));
+            
+        } else {
+
+            console.log('Creating custom copy of API todo');
+            const customTodo = {
+                ...todo,
+                completed: completed,
+                isCustom: true,
+                originalId: todo.id, 
+                id: `custom_${todo.id}_${Date.now()}` 
+            };
+            
+            this.storage.saveTodo(customTodo);
+        }
+        
+
+        this.todos[todoIndex].completed = completed;
+        this.filterTodos();
+        
+
         await this.loadData();
         this.app.router.handleRouteChange();
     }
@@ -284,16 +315,41 @@ export class TodoList {
 
     async loadData() {
         try {
+
             const users = await API.getUsers();
             this.user = users.find(user => user.id === this.userId);
             
+
             const apiTodos = await API.getUserTodos(this.userId);
+            
             const customTodos = this.storage.getUserTodos(this.userId);
             
-            this.todos = [...apiTodos, ...customTodos];
+            const allTodos = [...apiTodos, ...customTodos];
+            
+            this.todos = allTodos.reduce((unique, todo) => {
+                if (todo.isCustom && todo.originalId) {
+                    const originalIndex = unique.findIndex(t => t.id === todo.originalId && !t.isCustom);
+                    if (originalIndex !== -1) {
+                        unique.splice(originalIndex, 1);
+                    }
+                }
+                
+                const existingIndex = unique.findIndex(t => t.id === todo.id);
+                if (existingIndex === -1) {
+                    unique.push(todo);
+                } else {
+                    if (todo.isCustom) {
+                        unique[existingIndex] = todo;
+                    }
+                }
+                
+                return unique;
+            }, []);
+            
             this.filterTodos();
             
-            console.log('Loaded todos for user', this.userId, ':', this.todos);
+            console.log('Loaded todos:', this.todos);
+            
         } catch (error) {
             console.error('Error loading todos:', error);
             this.todos = this.storage.getUserTodos(this.userId);

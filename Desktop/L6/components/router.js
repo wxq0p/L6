@@ -21,10 +21,13 @@ export class Router {
 
     handleRouteChange() {
         const hash = window.location.hash.substring(1) || 'users';
+        console.log('Route changed to:', hash);
         this.navigateTo(hash);
     }
 
     navigateTo(path) {
+        console.log('Navigating to:', path);
+        
         if (path.startsWith('users#todos#')) {
             this.showUserTodos();
             this.updateBrowserHistory(path);
@@ -83,6 +86,7 @@ export class Router {
     async showUserTodos() {
         try {
             const userId = this.getUserIdFromHash();
+            console.log('Showing todos for user:', userId);
             if (userId) {
                 const todoList = new TodoList(this.app, userId);
                 const view = await todoList.render();
@@ -99,6 +103,7 @@ export class Router {
     async showUserPosts() {
         try {
             const userId = this.getUserIdFromHash();
+            console.log('Showing posts for user:', userId);
             if (userId) {
                 const postList = new PostList(this.app, userId);
                 const view = await postList.render();
@@ -126,11 +131,13 @@ export class Router {
     async showPostComments() {
         try {
             const postId = this.getPostIdFromHash();
+            console.log('Showing comments for post:', postId);
             if (postId) {
                 const commentList = new CommentList(this.app, postId);
                 const view = await commentList.render();
                 this.app.setView(view);
             } else {
+                console.log('No post ID found');
                 this.showUsers();
             }
         } catch (error) {
@@ -141,17 +148,51 @@ export class Router {
 
     getUserIdFromHash() {
         const hash = window.location.hash.substring(1);
+        console.log('Current hash for user ID:', hash);
+        
         const match1 = hash.match(/users#todos#(\d+)/);
         const match2 = hash.match(/users#posts#(\d+)/);
         
-        if (match1) return parseInt(match1[1]);
-        if (match2) return parseInt(match2[1]);
+        if (match1) {
+            const userId = parseInt(match1[1]);
+            console.log('Found user ID from todos:', userId);
+            return userId;
+        }
+        if (match2) {
+            const userId = parseInt(match2[1]);
+            console.log('Found user ID from posts:', userId);
+            return userId;
+        }
+        
+        console.log('No user ID found');
         return null;
     }
 
     getPostIdFromHash() {
         const hash = window.location.hash.substring(1);
-        const match = hash.match(/users#posts#comments#(\d+)/);
-        return match ? parseInt(match[1]) : null;
+        console.log('Current hash for post ID:', hash);
+        
+        const match1 = hash.match(/users#posts#comments#(\d+)/);
+        const match2 = hash.match(/posts#comments#(\d+)/);
+        const match3 = hash.match(/comments#(\d+)/);
+        
+        if (match1) {
+            const postId = parseInt(match1[1]);
+            console.log('Found post ID from pattern 1:', postId);
+            return postId;
+        }
+        if (match2) {
+            const postId = parseInt(match2[1]);
+            console.log('Found post ID from pattern 2:', postId);
+            return postId;
+        }
+        if (match3) {
+            const postId = parseInt(match3[1]);
+            console.log('Found post ID from pattern 3:', postId);
+            return postId;
+        }
+        
+        console.log('No post ID found in hash');
+        return null;
     }
 }

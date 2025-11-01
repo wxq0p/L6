@@ -23,7 +23,14 @@ export class Storage {
 
     saveTodo(todo) {
         const todos = this.getTodos();
-        todos.push(todo);
+
+        const existingIndex = todos.findIndex(t => t.id === todo.id);
+        if (existingIndex !== -1) {
+            todos[existingIndex] = todo;
+        } else {
+            todos.push(todo);
+        }
+        
         localStorage.setItem(this.todosKey, JSON.stringify(todos));
     }
 
@@ -39,5 +46,13 @@ export class Storage {
     deleteUserTodos(userId) {
         const todos = this.getTodos().filter(todo => todo.userId !== userId);
         localStorage.setItem(this.todosKey, JSON.stringify(todos));
+    }
+
+    updateTodoStatus(todoId, completed) {
+        const todos = this.getTodos();
+        const updatedTodos = todos.map(todo => 
+            todo.id === todoId ? { ...todo, completed } : todo
+        );
+        localStorage.setItem(this.todosKey, JSON.stringify(updatedTodos));
     }
 }
